@@ -40,7 +40,6 @@ linkcolor=black
 \tableofcontents
 
 \newpage
-
 \section{摘要}
 
 本项目设计了一个由四旋翼无人机和消防车构成的空地协同智能消防系统。无人机负责巡逻检测火源,消防车负责灭火。该系统的设计目标是实现无人机对火源的侦察以及消防车的灭火，并缩短巡逻覆盖时间和灭火响应时间。
@@ -51,16 +50,15 @@ linkcolor=black
 
 无人机 python wifi yolo K210 Arduino Linux
 
-\newpage
 \section{引言}
 
 在近年来，无人机和无人驾驶车辆在各种环境中表现出强大的适应性和效能，特别是在危险或不便进入的环境中。我们的项目旨在设计一个基于无人机和无人消防车的自动化火源检测和扑救模拟系统，以提高火灾应急响应的效率和安全性。
 
 设计这样一个系统涉及到的问题包括：火源的快速和准确检测，火源位置的精确确定，以及无人机和无人车的协同工作。我们的解决方案是，无人机巡逻并使用内置的摄像头检测火源，然后将火源的位置信息发送给无人车，无人车根据接收到的信息进行导航和扑火。
 
-我们选择大疆的Tello无人机作为空中平台，因为它小巧轻便，操作灵活，而且有完整的软件开发工具包支持编程控制。同时，我们采用了传统的四轮双驱微缩车作为地面平台，并使用 K210 模块和 Arduino Nano 单片机来实现其控制任务。
-
 本文档将详细介绍我们的设计方案，包括系统的构成，电路设计，软件设计，以及系统的工作流程。
+
+\newpage
 
 \section{设计与计算}
 
@@ -72,7 +70,7 @@ linkcolor=black
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{bff91c46fc5f6f6031116739473424e.jpg}
+    \includegraphics[width=0.4\textwidth]{bff91c46fc5f6f6031116739473424e.jpg}
     \caption{无人机巡逻路线示意图.}
     \label{无人机巡逻路线示意图}
 \end{figure}
@@ -84,7 +82,7 @@ linkcolor=black
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{6e7210d34c74a55112a223863fa78d1.jpg}
+    \includegraphics[width=0.4\textwidth]{6e7210d34c74a55112a223863fa78d1.jpg}
     \caption{微缩消防车导航示意图.}
     \label{微缩消防车导航示意图}
 \end{figure}
@@ -107,20 +105,18 @@ linkcolor=black
 
 导出为yolo 类型的数据集并采⽤训练\\验证\\测试数据等量分类,导⼊之后采⽤以下命令:
 
-\begin{lstlisting}
 python3 train.py --img 640 --batch 16 --epochs 100 --data outputcontent(path) --weights yolov5s.pt
-\end{lstlisting}
 
 上述内容即为使⽤yolo5s.pt预训练参数进⾏学习训练,并在runs ⽂件夹内对应得到小灯模型。
 
 实际使⽤
 转换模型:
 
-\begin{lstlisting}
+
 python3 export.py --weights
 
 ./runs/train/exp5/weights/best.pt --include onnx
-\end{lstlisting}
+
 
 转化好后在runs ⽂件夹内⾃⼰可以找到(程序会提⽰位置)
 本机训练好后可以将模型转移到onnx ⽂件内进⾏识别即可视化模型,你们可以把.onnx ⽂件传进去⾃⼰导出。
@@ -150,10 +146,11 @@ python3 export.py --weights
 
 \subsubsection{距离识别}
 
-由下⽅摄像头进⾏流光算法
-背景问题:
+由下⽅摄像头进⾏流光算法\\
+背景问题:\\
 
 1. ⻜机⾏进过程中会产⽣⻆度偏移,会导致激光位置不是当前实际位置
+
 2. ⻜机⾼度不会恒定在1.8m,会导致图⽚参考系不⼀致
 
 处理⽅法:
@@ -163,16 +160,21 @@ $dis=f(a,\text{待定参数,当前陀螺仪读取的倾斜角度})$
 
 理论讲是⼀个线性⽅法:
 
-- 可以根据当前的激光所在位置的⽅格线⻓度计算当前激光距离
-- 根据激光距离与倾斜⻆求解投影距离
-- 上⼀阶段所计算的运动⽅向向量可以近似表达为当前状态的⽅向向量
-- 由激光所在的位置向⽅向向量偏移投影距离的⻓度即为当前真实所在的位置
+可以根据当前的激光所在位置的⽅格线⻓度计算当前激光距离
+
+根据激光距离与倾斜度求解投影距离
+
+上⼀阶段所计算的运动⽅向向量可以近似表达为当前状态的⽅向向量
+
+由激光所在的位置向⽅向向量偏移投影距离的⻓度即为当前真实所在的位置
 
 接下来:
 
-- 在地图中将左下⻆标记为坐标系原点
-- 采⽤光流⽅案判断⽆⼈机的从上⼀个状态的变化向量（x,y）
-- 从原点初始考虑每⼀帧的变化做累加
+在地图中将左下侧标记为坐标系原点
+
+采⽤光流⽅案判断⽆⼈机的从上⼀个状态的变化向量（x,y）
+
+从原点初始考虑每⼀帧的变化做累加
 
 \subsection{控制方法}
 
@@ -182,15 +184,15 @@ $dis=f(a,\text{待定参数,当前陀螺仪读取的倾斜角度})$
 
 在这个项目中，对无人机的主要控制如下：
 
-1. **初始化和连接无人机：** 该步骤涉及到启动无人机，建立起无人机与控制设备（这里可能是一台电脑或者开发板）之间的WiFi连接。
+1. 初始化和连接无人机： 该步骤涉及到启动无人机，建立起无人机与控制设备（这里可能是一台电脑或者开发板）之间的WiFi连接。
 
-2. **无人机起飞：** 通过RoboMaster库的起飞命令，启动无人机的电机并使其离地起飞。
+2. 无人机起飞： 通过RoboMaster库的起飞命令，启动无人机的电机并使其离地起飞。
 
-3. **无人机飞行控制：** 这包括无人机的飞行路径控制，包括向前、向后、向左、向右移动，以及上升和下降。这些控制都可以通过RoboMaster库中的相应命令来实现。
+3. 无人机飞行控制： 这包括无人机的飞行路径控制，包括向前、向后、向左、向右移动，以及上升和下降。这些控制都可以通过RoboMaster库中的相应命令来实现。
 
-4. **获取无人机传感器数据：** RoboMaster库还能获取无人机的传感器数据，包括图像、姿态等。这些数据可用于环境感知，以及飞行状态监控和控制。
+4. 获取无人机传感器数据： RoboMaster库还能获取无人机的传感器数据，包括图像、姿态等。这些数据可用于环境感知，以及飞行状态监控和控制。
 
-5. **无人机降落：** 在任务完成后，无人机会执行降落命令，然后关闭电机。
+5. 无人机降落： 在任务完成后，无人机会执行降落命令，然后关闭电机。
 
 在实际编程过程中，为了达到控制无人机巡航并在适当的间隔时间进行拍照的需求，可能会创建一个主循环，其中包含飞行控制命令和拍照命令。通过在主循环中调整这些命令的执行频率和顺序，可以实现无人机的巡航控制和定时拍照。
 
@@ -200,11 +202,11 @@ $dis=f(a,\text{待定参数,当前陀螺仪读取的倾斜角度})$
 
 该项目对微缩消防车的控制方法主要分为两个层次：高层逻辑处理和底层硬件控制。
 
-1. **高层逻辑处理：** 在高层逻辑处理中，主要由K210模块负责。这个模块运行Python程序，处理图像识别、路径规划、目标识别、避障等高级任务。它通过摄像头获取周围环境的信息，然后利用图像处理和机器视觉技术对这些信息进行解析，生成对应的控制指令。这些指令可能包括移动方向和速度、避障策略等。K210模块还接入了WiFi模块，可以进行无线通信，例如接收远程指令或者发送状态报告等。
+1. 高层逻辑处理： 在高层逻辑处理中，主要由K210模块负责。这个模块运行Python程序，处理图像识别、路径规划、目标识别、避障等高级任务。它通过摄像头获取周围环境的信息，然后利用图像处理和机器视觉技术对这些信息进行解析，生成对应的控制指令。这些指令可能包括移动方向和速度、避障策略等。K210模块还接入了WiFi模块，可以进行无线通信，例如接收远程指令或者发送状态报告等。
 
-2. **底层硬件控制：** 在底层硬件控制中，主要由Arduino单片机负责。它从K210模块接收控制指令，然后生成相应的控制信号驱动电机和舵机。在驱动电机的过程中，Arduino会根据编码器的反馈信号调整电机的转速，实现对小车速度的精确控制。Arduino还会控制舵机的角度，实现小车的转向。同时，Arduino还会读取各种传感器的数据，供其做出进一步的决策。
+2. 底层硬件控制： 在底层硬件控制中，主要由Arduino单片机负责。它从K210模块接收控制指令，然后生成相应的控制信号驱动电机和舵机。在驱动电机的过程中，Arduino会根据编码器的反馈信号调整电机的转速，实现对小车速度的精确控制。Arduino还会控制舵机的角度，实现小车的转向。同时，Arduino还会读取各种传感器的数据，供其做出进一步的决策。
 
-3. **通信和协作：** K210模块和Arduino单片机通过串口进行通信，共同完成微缩消防车的任务。在这个协作模式中，K210模块负责高层的逻辑处理和决策，Arduino单片机负责底层的设备控制和状态反馈。这种控制方法有效地将计算密集型的任务和实时性要求高的任务分开，使得系统既能处理复杂的逻辑任务，又能保证实时性和稳定性，实现了对微缩消防车的有效控制。
+3. 通信和协作： K210模块和Arduino单片机通过串口进行通信，共同完成微缩消防车的任务。在这个协作模式中，K210模块负责高层的逻辑处理和决策，Arduino单片机负责底层的设备控制和状态反馈。这种控制方法有效地将计算密集型的任务和实时性要求高的任务分开，使得系统既能处理复杂的逻辑任务，又能保证实时性和稳定性，实现了对微缩消防车的有效控制。
 
 \subsection{通信方式描述及参数计算}
 
@@ -221,25 +223,25 @@ $dis=f(a,\text{待定参数,当前陀螺仪读取的倾斜角度})$
 
 \subsection{技术路线}
 
-1. **节点设备选择与部署**：选择合适的硬件设备，包括无人机、消防车模型和计算中心。这些设备需要具有一定的计算能力和通信功能，并能够支持自主控制和数据收发。
+1. 节点设备选择与部署：选择合适的硬件设备，包括无人机、消防车模型和计算中心。这些设备需要具有一定的计算能力和通信功能，并能够支持自主控制和数据收发。
 
-2. **节点软件设计与开发**：为每个节点设计并开发相应的软件系统。无人机需要能够自主飞行，并能拍摄并发送图像数据。消防车需要能够根据接收到的位置信号进行自主驾驶。计算中心需要能够接收和处理图像数据，识别火源，并将火源的位置信息发送给消防车。
+2. 节点软件设计与开发：为每个节点设计并开发相应的软件系统。无人机需要能够自主飞行，并能拍摄并发送图像数据。消防车需要能够根据接收到的位置信号进行自主驾驶。计算中心需要能够接收和处理图像数据，识别火源，并将火源的位置信息发送给消防车。
 
-3. **通信机制设计与实现**：需要设计和实现一个通信机制，使得各个节点能够有效地通信和协同工作。这个机制需要支持实时数据传输，以满足系统对实时性的需求。
+3. 通信机制设计与实现：需要设计和实现一个通信机制，使得各个节点能够有效地通信和协同工作。这个机制需要支持实时数据传输，以满足系统对实时性的需求。
 
-4. **图像处理与火源识别**：设计和实现一个图像处理算法，能够从无人机拍摄的图像中识别出火源。这个算法需要有高的识别准确率，以保证系统的效果。
+4. 图像处理与火源识别：设计和实现一个图像处理算法，能够从无人机拍摄的图像中识别出火源。这个算法需要有高的识别准确率，以保证系统的效果。
 
-5. **系统测试与优化**：在这一阶段，我们需要对整个系统进行测试，并根据测试结果进行优化。这包括硬件设备的稳定性测试、软件系统的功能测试、通信协议的性能测试、图像处理算法的准确率测试等。
+5. 系统测试与优化：在这一阶段，我们需要对整个系统进行测试，并根据测试结果进行优化。这包括硬件设备的稳定性测试、软件系统的功能测试、通信协议的性能测试、图像处理算法的准确率测试等。
 
 \subsection{系统结构}
 
-1. **无人机节点**:该节点负责自主飞行并获取图像数据,与中心节点通信发送图像。
+1. 无人机节点:该节点负责自主飞行并获取图像数据,与中心节点通信发送图像。
 
-2. **消防车节点**:该节点负责根据指令进行自主驾驶,与中心节点通信获取目标位置。
+2. 消防车节点:该节点负责根据指令进行自主驾驶,与中心节点通信获取目标位置。
 
-3. **通信中心节点**:该节点作为系统的核心,负责协调控制、通信交互、图像处理等功能。
+3. 通信中心节点:该节点作为系统的核心,负责协调控制、通信交互、图像处理等功能。
 
-4. **通信网络**:连接各个节点,负责节点间的数据传输。
+4. 通信网络:连接各个节点,负责节点间的数据传输。
 
 \subsection{方案描述}
 
@@ -279,7 +281,7 @@ $dis=f(a,\text{待定参数,当前陀螺仪读取的倾斜角度})$
 
 \subsection{方案论证}
 
-该集中式方案**工作原理**是:
+该集中式方案工作原理是:
 
 1. 通信中心节点为无人机节点和消防车节点提供通信接口和协同控制算法。
 
@@ -289,7 +291,7 @@ $dis=f(a,\text{待定参数,当前陀螺仪读取的倾斜角度})$
 
 4. 中心节点负责对图像的处理分析，并将分析结果作为发送给无人机和消防车。
 
-采用该方案可以实现以下**设计目标**:
+采用该方案可以实现以下设计目标:
 
 1. 节点解耦,软件设计更加清晰,便于迭代开发。
 
@@ -317,7 +319,7 @@ Tello自带的可视光和红外摄像头能够满足项目中的视觉识别需
 
 微缩车采用 K210 模块作为主控上位机，它拥有强大的数据处理和计算能力。具有较高的处理器速度和较大的内存，可以运行Python程序。在这个系统中，K210 模块的主要职责是处理和决策高层逻辑，如路径规划、目标识别、避障等，以及与下位机 Arduino nano 单片机之间的数据交互。K210 模块接入了摄像头模块和wifi模块，可以进行图像识别、无线通信等复杂任务。
 
-微缩车使用了一片Arduino单片机作为下位机，在这个系统中的主要职责包括 1. **控制执行部件**：根据主控开发板的指令，生成控制信号驱动电机、舵机等执行部件。2. **读取传感器数据**：读取系统中的各种传感器数据（如电机的转速、舵机的角度等），然后将这些信息反馈给主控开发板。Arduino实时性强、稳定性好、功耗低，完成一些对实时性要求高、数据处理量不大的任务。
+微缩车使用了一片Arduino单片机作为下位机，在这个系统中的主要职责包括 1. 控制执行部件：根据主控开发板的指令，生成控制信号驱动电机、舵机等执行部件。2. 读取传感器数据：读取系统中的各种传感器数据（如电机的转速、舵机的角度等），然后将这些信息反馈给主控开发板。Arduino实时性强、稳定性好、功耗低，完成一些对实时性要求高、数据处理量不大的任务。
 
 总的来说，K210 模块和Arduino单片机在这个系统中的协作关系是：主控开发板负责高层的逻辑处理和决策，下位机负责底层的设备控制和状态反馈。两者通过有线连接进行数据交换，共同完成微缩消防车的任务。
 
@@ -329,9 +331,12 @@ Tello自带的可视光和红外摄像头能够满足项目中的视觉识别需
 
 Ubuntu 操作系统为系统提供了稳定和可靠的基础。它具有广泛的软件支持和开发工具，使得开发人员能够轻松地进行应用程序的开发和部署。
 
-![Alt text](d3eab6b9db9c82d39684dc3e565554c.jpg)
-
-ubuntu 图形界面
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{d3eab6b9db9c82d39684dc3e565554c.jpg}
+\caption{ubuntu 图形界面.}
+\label{ubuntu 图形界面}
+\end{figure}
 
 其次，Nvidia Jetson Nano 嵌入式开发板搭载了 Nvidia 的 GPU 架构，具备强大的并行计算能力。这使得它能够高效地处理图像和视频数据，实时进行图像分析和处理。通过使用先进的图像处理算法和深度学习技术，它能够准确地识别火源迹象，并进行实时的火源分析。
 
@@ -461,9 +466,8 @@ Arduino 单片机不断接收来自上位机 K210 发送的字符串信号，解
     \centering
     \subfigure[]{\includegraphics[width=0.45\textwidth]{image-9.png}}
     \subfigure[]{\includegraphics[width=0.45\textwidth]{image-10.png}}
+    \caption{识别效果截图.}
 \end{figure}
-
-识别效果截图
 
 \section{测试方案与测试结果}
 
@@ -471,7 +475,7 @@ Arduino 单片机不断接收来自上位机 K210 发送的字符串信号，解
 
 \subsubsection{测试标准}
 
-我们测试的主要标准主要有两点 **1. 准确性** **2. 时效性**
+我们测试的主要标准主要有两点 1. 准确性 2. 时效性
 
 \subsubsubsection{准确性}
 
@@ -494,9 +498,13 @@ Arduino 单片机不断接收来自上位机 K210 发送的字符串信号，解
 
 搭建了1：1的模拟地图，并且形成了无人机安全飞行的空间。
 
-![Alt text](49bd6c4da1d815bf96125a79fc2dbed.jpg)
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{49bd6c4da1d815bf96125a79fc2dbed.jpg}
+    \caption{测试空间.}
+    \label{测试空间}
+\end{figure}
 
-测试空间
 
 \subsection{测试结果}
 
@@ -528,43 +536,54 @@ Arduino 单片机不断接收来自上位机 K210 发送的字符串信号，解
 
 综上,系统在准确性和时效性这两个关键性能指标上都取得了良好的结果,达到了设计目标,整体工作成效较好。系统性能可靠稳定,能够满足实际应用需求。后续可通过进一步优化算法和提升硬件性能,使系统效果更佳。
 
+
+
+\pagebreak
+
+\appendix
+
 \section{参考资料}
 
-G题_空地协同智能消防系统(1).pdf. (2023). 2023 年全国大学生电子设计竞赛试题
+\begin{thebibliography}{99}
 
-睿炽科技. (2020). RoboMaster TT Tello Talent 用户手册 [User Manual]. (V1.0). <https://www.dji.com/robomaster-tt>
+	\bibitem{unmanned2023} "2023 年全国大学生电子设计竞赛试题" 《空地协同智能消防系统》, 2023.
+	
+	\bibitem{telloTalent2020} 睿炽科技, "RoboMaster TT Tello Talent 用户手册 [User Manual]", V1.0, 2020. \url{https://www.dji.com/robomaster-tt}
+	
+	\bibitem{liubaojian2022} 刘保健, "不确定环境下无人机与无人车双层路径规划算法研究", 哈尔滨工业大学, 硕士学位论文, 2022.
+	
+	\bibitem{fanyongsheng2022} 范勇生, "基于空地多视角协同探测的同时定位与建图方法研究", 哈尔滨工业大学, 硕士学位论文, 2022.
+	
+	\bibitem{lvzhaohui2021} 律朝辉, "基于无人机的森林火情监测与路径规划研究", 西安理工大学, 硕士学位论文, 2021.
+	
+	\bibitem{zoupengcheng2021} 邹鹏程, "微小型空地无人系统协同导航技术研究", 哈尔滨工业大学, 硕士学位论文, 2021.
+	
+	\bibitem{zhaowenjie2022} 赵文杰, "无人机/无人车混合编队的趋同控制与轨迹跟踪研究", 长安大学, 硕士学位论文, 2022.
+	
+	\bibitem{xupengkai2023} 徐鹏凯, "一种无人机和无人车结合的高层建筑消防装备的设计", 科技与创新, vol. 02, pp. 65, 2023.
+	
+	\bibitem{robomastersdk} RoboMaster, "RoboMaster SDK Documentation", n.d. \url{https://robomaster-dev.readthedocs.io/zh_CN/latest/index.html}
+	
+	\bibitem{pythonSDK} RoboMaster, "Python SDK - 简单无人机", n.d. \url{https://robomaster-dev.readthedocs.io/zh_CN/latest/python_sdk/beginner_drone.html#id6}
+	
+	\bibitem{tencentcloud} 腾讯云, "Article-tt", n.d. \url{https://cloud.tencent.com/developer/search/article-tt}
+	
+	\bibitem{djisdk} DJI-SDK, "RoboMaster-SDK", n.d. \url{https://github.com/dji-sdk/RoboMaster-SDK/blob/master}
+	
+	\bibitem{rpi4} Diustou Wiki, "Raspberry Pi 4 Model B", n.d. \url{https://wiki.diustou.com/cn/Raspberry_Pi_4_Model_B}
+	
+	\bibitem{jetsonNano} NVIDIA Developer, "Getting Started With Jetson Nano Developer Kit", n.d. \url{https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write}
+	
+	\bibitem{jetsonNanoArduino} NVIDIA Developer Forums, "Sending serial rx/tx data from Jetson Nano to Arduino", n.d. \url{https://forums.developer.nvidia.com/t/sending-serial-rx-tx-data-from-jetson-nano-to-arduino/123363}
+	
+	\bibitem{arduinoLinux} Arduino, "Linux Tutorials", n.d. \url{https://docs.arduino.cc/software/ide-v1/tutorials/Linux}
+	
+	\bibitem{ch340install} 0xsuk, "How to install CH340 on Ubuntu 22.04", July 19, 2022. \url{https://0xsuk.github.io/posts/2022-07-19-how-to-install-ch340-on-ubuntu-22.04/}
+	
+	\bibitem{ultralytics} Ultralytics, "Running on Jetson Nano", n.d. \url{https://docs.ultralytics.com/yolov5/tutorials/running_on_jetson_nano/#before-you-start}
 
-刘保健（2022）.《不确定环境下无人机与无人车双层路径规划算法研究》[硕士学位论文, 哈尔滨工业大学].
+\end{thebibliography}
 
-范勇生. (2022). 基于空地多视角协同探测的同时定位与建图方法研究 [硕士学位论文, 哈尔滨工业大学].
-
-律朝辉（2021）.基于无人机的森林火情监测与路径规划研究 [硕士学位论文，西安理工大学].
-
-邹鹏程（2021）.微小型空地无人系统协同导航技术研究[硕士学位论文,哈尔滨工业大学].
-
-赵文杰. (2022). 无人机/无人车混合编队的趋同控制与轨迹跟踪研究 [硕士学位论文, 长安大学].
-
-徐鹏凯. (2023). 一种无人机和无人车结合的高层建筑消防装备的设计. 科技与创新, (02), 65.
-
-RoboMaster. (n.d.). RoboMaster SDK Documentation. Retrieved August 5, 2023, from <https://robomaster-dev.readthedocs.io/zh_CN/latest/index.html>
-
-RoboMaster. (n.d.). Python SDK - 简单无人机. Retrieved August 5, 2023, from <https://robomaster-dev.readthedocs.io/zh_CN/latest/python_sdk/beginner_drone.html#id6>
-
-腾讯云. (n.d.). Article-tt. Retrieved August 5, 2023, from <https://cloud.tencent.com/developer/search/article-tt>
-
-DJI-SDK. (n.d.). RoboMaster-SDK. Retrieved August 5, 2023, from <https://github.com/dji-sdk/RoboMaster-SDK/blob/master>
-
-Diustou Wiki. (n.d.). Raspberry Pi 4 Model B. Retrieved August 5, 2023, from <https://wiki.diustou.com/cn/Raspberry_Pi_4_Model_B>
-
-NVIDIA Developer. (n.d.). Getting Started With Jetson Nano Developer Kit. Retrieved August 5, 2023, from <https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write>
-
-NVIDIA Developer Forums. (n.d.). Sending serial rx/tx data from Jetson Nano to Arduino. Retrieved August 5, 2023, from <https://forums.developer.nvidia.com/t/sending-serial-rx-tx-data-from-jetson-nano-to-arduino/123363>
-
-Arduino. (n.d.). Linux Tutorials. Retrieved August 5, 2023, from <https://docs.arduino.cc/software/ide-v1/tutorials/Linux>
-
-0xsuk. (2022, July 19). How to install CH340 on Ubuntu 22.04. Retrieved August 5, 2023, from <https://0xsuk.github.io/posts/2022-07-19-how-to-install-ch340-on-ubuntu-22.04/>
-
-Ultralytics. (n.d.). Running on Jetson Nano. Retrieved August 5, 2023, from <https://docs.ultralytics.com/yolov5/tutorials/running_on_jetson_nano/#before-you-start>
 
 
 
